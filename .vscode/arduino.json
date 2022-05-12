@@ -1,0 +1,7 @@
+{
+    "configuration": "FlashFreq=80,PartitionScheme=default,CPUFreq=240,UploadSpeed=921600,DebugLevel=none",
+    "board": "esp32:esp32:lolin32-lite",
+    "programmer": "esp32:esptool",
+    "port": "/dev/ttyUSB0",
+    "sketch": "../220511-195524-lolin32_lite/src/sketch_may04a.ino"
+}
