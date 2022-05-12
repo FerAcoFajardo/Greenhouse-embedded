@@ -1,20 +1,25 @@
+// Import string
 #include <string.h>
+// Import NoDelay
 #include <NoDelay.h>
+// Import DHT library
 #include "DHT.h"
+// Import WIFI
 #include <WiFi.h>
+// Import HTTPClient
 #include <HTTPClient.h>
 
-// const unsigned int PIN_RELEVADOR = 5;
+// Constante para el pin del relevador de la bomba de agua
 #define PIN_RELEVADOR 2
-// const unsigned int PIN_RELEVADOR_FOCO = 6;
+// Constante para el pin del relevador del foco
 #define PIN_RELEVADOR_FOCO 15
-// const unsigned int BAUD_RATE = 9600;
+// Constante para el baud rate
 #define BAUD_RATE 9600
-// const unsigned int SOIL_SENSOR = A0;
+// Constante para el pin del sensor de humedad del suelo
 #define SOIL_SENSOR 36
-// const unsigned int PIN_DHT = 2;
+// Constante para el pin del sensor de temperatura y humedad DHT11
 #define PIN_DHT 0
-// const long PERIODO = 1000;
+// Constante para 
 #define PERIODO 1000
 // Crea una instancia de la clase noDelay
 // que determina si han transcurrido PERIODO ms
