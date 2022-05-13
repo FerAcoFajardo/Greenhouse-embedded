@@ -9,80 +9,111 @@
 // Import HTTPClient
 #include <HTTPClient.h>
 
-// Constante para el pin del relevador de la bomba de agua
+// Const to the pump water relay
 #define PIN_RELEVADOR 2
-// Constante para el pin del relevador del foco
+// Const to the light bulb relay
 #define PIN_RELEVADOR_FOCO 15
-// Constante para el baud rate
+// Const to baud rate
 #define BAUD_RATE 9600
-// Constante para el pin del sensor de humedad del suelo
+// Const to soil moisture sensor
 #define SOIL_SENSOR 36
-// Constante para el pin del sensor de temperatura y humedad DHT11
+// Const to DHT11 temperature and moisture
 #define PIN_DHT 0
-// Constante para 
+// Const to the pause 
 #define PERIODO 1000
-// Crea una instancia de la clase noDelay
-// que determina si han transcurrido PERIODO ms
+// Create an instance of the class noDelay
+// that determinate if the time lapse PERIODO ms
 
 // Config for wifi
-#define WIFI_SSID "Tuli"
-#define WIFI_PASS "24dfg5647mt"
+#define WIFI_SSID "Dinosaurio"
+#define WIFI_PASS "dinosaurio1412"
+// Endpoint link for the API
 #define HOST "https://greenhouse-empotrados.herokuapp.com/sensors/api/"
+// Last time when api call was made
 unsigned long lastTime = 0;
+// Delay for the api call
 #define timerDelay 10000
 
+// NoDelay instance for get data
 noDelay pausa(PERIODO);
+// NoDelay instance for make api call
 noDelay pausa2(15000);
+// DHT instance
 DHT dht(PIN_DHT, DHT11);
-
+// Variable for soil humidity data
 int soilMoistureSensorData;
+// Variable for temperature data
 float actualTemperature;
-const float LIMIT_TEMPERATURE = 26;
+// Const for maximun temperature
+float LIMIT_TEMPERATURE = 26;
+// Const for maximum solil humidity
 int limit = 450;
 
-void setup()
-{
+/**
+ * @brief Setup function, to setup the hardware
+ * 
+ */
+void setup(){
 
+	// Init baud rate
 	Serial.begin(BAUD_RATE);
 
+	// Init connection to wifi
 	WiFi.begin(WIFI_SSID, WIFI_PASS);
+	// Print in serial port to if connection to wifi
 	Serial.println("Connecting");
-	while (WiFi.status() != WL_CONNECTED)
-	{
+	// While not connected to wifi print dots
+	while (WiFi.status() != WL_CONNECTED){
 		delay(500);
 		Serial.print(".");
 	}
+
+	// Print in serial port private ip
 	Serial.println("");
 	Serial.print("Connected to WiFi network with IP Address: ");
 	Serial.println(WiFi.localIP());
 
 	Serial.println("Timer set to 10 seconds (timerDelay variable), it will take 10 seconds before publishing the first reading.");
 
+	// Set relay pin to output
 	pinMode(PIN_RELEVADOR, OUTPUT);
+	// Set light bulb pin to output
 	pinMode(PIN_RELEVADOR_FOCO, OUTPUT);
-	// Establece la velocidad de transmisión del puerto serie al
-	// valor BAUD_RATE
+	// Set relay as off
 	digitalWrite(PIN_RELEVADOR, LOW);
+	// Set relay as off
 	digitalWrite(PIN_RELEVADOR_FOCO, LOW);
 
+	// Begin DHT11
 	dht.begin();
 }
 
-float leeHumedadTemperatura()
-{
+/**
+ * @brief Read temperature
+ * 
+ * @return float Temperature
+ */
+float leeHumedadTemperatura(){
+	// Read temperature from dht11
 	float tc = dht.readTemperature();
+	// Return temperature
 	return tc;
 }
 
-void guardarInformacionSensor(int sensor_id, float value, int sensor_id2, float value2)
-{
+/**
+ * @brief Make API call to save sensor data
+ * 
+ * @param sensor_id First sensor id
+ * @param value First sensor value
+ * @param sensor_id2 Second sensor id
+ * @param value2 Second sensor value
+ */
+void guardarInformacionSensor(int sensor_id, float value, int sensor_id2, float value2){
 
 	// Send an HTTP POST request every 10 seconds
-	if ((millis() - lastTime) > timerDelay)
-	{
+	if ((millis() - lastTime) > timerDelay){
 		// Check WiFi connection status
-		if (WiFi.status() == WL_CONNECTED)
-		{
+		if (WiFi.status() == WL_CONNECTED){
 			// WiFiClient client;
 			HTTPClient http;
 
@@ -91,78 +122,87 @@ void guardarInformacionSensor(int sensor_id, float value, int sensor_id2, float 
 
 			// Specify content-type header
 			http.addHeader("Content-Type", "application/json");
-			// // Data to send with HTTP POST
-			String payload = "{\"sensor\":\"" + String(sensor_id) + "\",\"data\":\"" + String(value) + "\"}";
-			// // Send HTTP POST request
-			int httpResponseCode = http.POST(payload);
-			// int httpResponseCode = http.GET();
-			// String payload = http.getString();
-			// Serial.print("Response content: ");
-			// Serial.println(payload);
-			
+			// Data to send with HTTP POST to send first sensor data (temperature)
+			String body = "{\"sensor\":\"" + String(sensor_id) + "\",\"data\":\"" + String(value) + "\"}";
+			// Send HTTP POST request to the server
+			int httpResponseCode = http.POST(body);
 
+			// Check the response code
 			Serial.print("HTTP Response code: ");
 			Serial.println(httpResponseCode);
-			String payload2 = "{\"sensor\":\"" + String(sensor_id2) + "\",\"data\":\"" + String(value2) + "\"}";
-
-			httpResponseCode = http.POST(payload2);
-
+			// Data to send with HTTP POST to send second sensor data (humidity)
+			String body2 = "{\"sensor\":\"" + String(sensor_id2) + "\",\"data\":\"" + String(value2) + "\"}";
+			// Send HTTP POST request to the server
+			httpResponseCode = http.POST(body2);
+			// Check the response code
 			Serial.print("HTTP Response code: ");
 			Serial.println(httpResponseCode);
 
 			// Free resources
 			http.end();
 		}
-		else
-		{
+		else{
+			// Print in serial port if not connected to wifi
 			Serial.println("WiFi Disconnected");
 		}
+		// Update lastTime
 		lastTime = millis();
 	}
 }
 
-void loop()
-{
+/**
+ * @brief Loop function, to read data and make API call
+ * 
+ */
+void loop(){
 
-	if (pausa.update())
-	{
+	// If the time lapse is over, read all data, temperature and humidity
+	if (pausa.update()){
+		// Read DHT11 temperature and humidity
 		actualTemperature = leeHumedadTemperatura();
 		Serial.println("Temperatura actual:");
 		Serial.println(actualTemperature);
 
+		// Read soil moisture sensor
 		soilMoistureSensorData = analogRead(SOIL_SENSOR);
+		// Transform analog value to digital value
 		soilMoistureSensorData = map(soilMoistureSensorData,550,0,0,100);
 
 		Serial.println("Sensor de humedad del suelo: ");
 		Serial.println(soilMoistureSensorData);
 	}
 
-
-
-	if (actualTemperature < LIMIT_TEMPERATURE)
-	{
+	
+	// If actual temperature is greater than LIMIT_TEMPERATURE, turn on the light bulb
+	if (actualTemperature < LIMIT_TEMPERATURE){
 		// Serial.println("Relevador foco endendida");
+		// Turn on the light bulb
 		digitalWrite(PIN_RELEVADOR_FOCO, HIGH);
 	}
-	else
-	{
+	// If actual temperature is less than LIMIT_TEMPERATURE, turn off the light bulb
+	else{
+
 		// Serial.println("Relevador foco apagado");
+		// Turn off the light bulb
 		digitalWrite(PIN_RELEVADOR_FOCO, LOW);
 	}
 
-
-	if (soilMoistureSensorData > limit)
-	{
+	// If soil moisture sensor value is greater than limit, turn on the pump
+	if (soilMoistureSensorData > limit){
 		// Serial.println("Bomba encendida");
+		// Turn on the pump
 		digitalWrite(PIN_RELEVADOR, HIGH);
 	}
-	else
-	{
+	// If soil moisture sensor value is less than limit, turn off the pump
+	else{
 		// Serial.println("Bomba apagada");
+		// Turn off the pump
 		digitalWrite(PIN_RELEVADOR, LOW);
 	}
-	if(pausa2.update())
-	{
+
+	// Make API call to save sensor data
+	if(pausa2.update()){
+		// Save sensor data
 		guardarInformacionSensor(1, actualTemperature, 2, soilMoistureSensorData);
 	}
 }
