@@ -32,7 +32,7 @@ DHT dht(PIN_DHT, DHT11);
 
 int soilMoistureSensorData;
 float actualTemperature;
-const float LIMIT_TEMPERATURE = 26;
+const float LIMIT_TEMPERATURE = 40;
 int limit = 450;
 
 void setup()
@@ -126,7 +126,7 @@ void loop()
 		Serial.println(actualTemperature);
 
 		soilMoistureSensorData = analogRead(SOIL_SENSOR);
-		soilMoistureSensorData = map(soilMoistureSensorData,550,0,0,100);
+		// soilMoistureSensorData = map(soilMoistureSensorData,550,0,0,100);
 
 		Serial.println("Sensor de humedad del suelo: ");
 		Serial.println(soilMoistureSensorData);
