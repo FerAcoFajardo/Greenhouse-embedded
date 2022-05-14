@@ -8,7 +8,6 @@
 #include <WiFi.h>
 // Import HTTPClient
 #include <HTTPClient.h>
-
 // Const to the pump water relay
 #define PIN_RELEVADOR 2
 // Const to the light bulb relay
@@ -21,9 +20,6 @@
 #define PIN_DHT 0
 // Const to the pause 
 #define PERIODO 1000
-// Create an instance of the class noDelay
-// that determinate if the time lapse PERIODO ms
-
 // Config for wifi
 #define WIFI_SSID "Dinosaurio"
 #define WIFI_PASS "dinosaurio1412"
