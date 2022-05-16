@@ -22,7 +22,7 @@
 #define PERIODO 1000
 // Config for wifi
 #define WIFI_SSID "Dinosaurio"
-#define WIFI_PASS "dinosaurio1412"
+#define WIFI_PASS "dinosaurio1612"
 // Endpoint link for the API
 #define HOST "https://greenhouse-empotrados.herokuapp.com/sensors/api/"
 // Last time when api call was made
@@ -40,7 +40,7 @@ int soilMoistureSensorData;
 // Variable for temperature data
 float actualTemperature;
 // Const for maximun temperature
-const float LIMIT_TEMPERATURE = 40;
+const float LIMIT_TEMPERATURE = 23;
 // Const for maximum solil humidity
 int limit = 450;
 
