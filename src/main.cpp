@@ -18,7 +18,7 @@
 #define SOIL_SENSOR 36
 // Const to DHT11 temperature and moisture
 #define PIN_DHT 0
-// Const to the pause 
+// Const to the pause
 #define PERIODO 1000
 // Config for wifi
 #define WIFI_SSID "Dinosaurio"
@@ -29,7 +29,6 @@
 unsigned long lastTime = 0;
 // Delay for the api call
 #define timerDelay 10000
-
 // NoDelay instance for get data
 noDelay pausa(PERIODO);
 // NoDelay instance for make api call
@@ -41,7 +40,7 @@ int soilMoistureSensorData;
 // Variable for temperature data
 float actualTemperature;
 // Const for maximun temperature
-float LIMIT_TEMPERATURE = 26;
+const float LIMIT_TEMPERATURE = 40;
 // Const for maximum solil humidity
 int limit = 450;
 
@@ -50,10 +49,8 @@ int limit = 450;
  * 
  */
 void setup(){
-
 	// Init baud rate
 	Serial.begin(BAUD_RATE);
-
 	// Init connection to wifi
 	WiFi.begin(WIFI_SSID, WIFI_PASS);
 	// Print in serial port to if connection to wifi
@@ -63,7 +60,6 @@ void setup(){
 		delay(500);
 		Serial.print(".");
 	}
-
 	// Print in serial port private ip
 	Serial.println("");
 	Serial.print("Connected to WiFi network with IP Address: ");
@@ -79,7 +75,7 @@ void setup(){
 	digitalWrite(PIN_RELEVADOR, LOW);
 	// Set relay as off
 	digitalWrite(PIN_RELEVADOR_FOCO, LOW);
-
+	
 	// Begin DHT11
 	dht.begin();
 }
@@ -118,18 +114,18 @@ void guardarInformacionSensor(int sensor_id, float value, int sensor_id2, float 
 
 			// Specify content-type header
 			http.addHeader("Content-Type", "application/json");
-			// Data to send with HTTP POST to send first sensor data (temperature)
-			String body = "{\"sensor\":\"" + String(sensor_id) + "\",\"data\":\"" + String(value) + "\"}";
-			// Send HTTP POST request to the server
-			int httpResponseCode = http.POST(body);
+			// // Data to send with HTTP POST
+			String payload = "{\"sensor\":\"" + String(sensor_id) + "\",\"data\":\"" + String(value) + "\"}";
+			// // Send HTTP POST request
+			int httpResponseCode = http.POST(payload);
 
 			// Check the response code
 			Serial.print("HTTP Response code: ");
 			Serial.println(httpResponseCode);
 			// Data to send with HTTP POST to send second sensor data (humidity)
-			String body2 = "{\"sensor\":\"" + String(sensor_id2) + "\",\"data\":\"" + String(value2) + "\"}";
+			String payload2 = "{\"sensor\":\"" + String(sensor_id2) + "\",\"data\":\"" + String(value2) + "\"}";
 			// Send HTTP POST request to the server
-			httpResponseCode = http.POST(body2);
+			httpResponseCode = http.POST(payload2);
 			// Check the response code
 			Serial.print("HTTP Response code: ");
 			Serial.println(httpResponseCode);
@@ -138,10 +134,8 @@ void guardarInformacionSensor(int sensor_id, float value, int sensor_id2, float 
 			http.end();
 		}
 		else{
-			// Print in serial port if not connected to wifi
 			Serial.println("WiFi Disconnected");
 		}
-		// Update lastTime
 		lastTime = millis();
 	}
 }
@@ -151,7 +145,6 @@ void guardarInformacionSensor(int sensor_id, float value, int sensor_id2, float 
  * 
  */
 void loop(){
-
 	// If the time lapse is over, read all data, temperature and humidity
 	if (pausa.update()){
 		// Read DHT11 temperature and humidity
@@ -161,27 +154,25 @@ void loop(){
 
 		// Read soil moisture sensor
 		soilMoistureSensorData = analogRead(SOIL_SENSOR);
-		// Transform analog value to digital value
-		soilMoistureSensorData = map(soilMoistureSensorData,550,0,0,100);
+		// soilMoistureSensorData = map(soilMoistureSensorData,550,0,0,100);
 
 		Serial.println("Sensor de humedad del suelo: ");
 		Serial.println(soilMoistureSensorData);
 	}
 
-	
+
 	// If actual temperature is greater than LIMIT_TEMPERATURE, turn on the light bulb
 	if (actualTemperature < LIMIT_TEMPERATURE){
 		// Serial.println("Relevador foco endendida");
 		// Turn on the light bulb
 		digitalWrite(PIN_RELEVADOR_FOCO, HIGH);
 	}
-	// If actual temperature is less than LIMIT_TEMPERATURE, turn off the light bulb
 	else{
-
 		// Serial.println("Relevador foco apagado");
 		// Turn off the light bulb
 		digitalWrite(PIN_RELEVADOR_FOCO, LOW);
 	}
+
 
 	// If soil moisture sensor value is greater than limit, turn on the pump
 	if (soilMoistureSensorData > limit){
